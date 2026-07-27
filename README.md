@@ -12,6 +12,7 @@
 - [Getters & Setters](#getters-setters)
 - [Classes Are Always in Strict Mode](#classes-are-always-in-strict-mode)
 - [Inheritance & `super`](#inheritance-must-know-for-interviews)
+- [Mixins](#mixins)
 - [Class vs Constructor Function (Quick Compare)](#class-vs-constructor-function-quick-compare)
 - [Class vs Function — Interview Core](#class-vs-function-interview-core)
 - [Interview Checklist](#interview-checklist)
@@ -502,7 +503,82 @@ cat.speak(); // "Milo makes a sound"
 4. Subclasses can add their own methods and still use inherited ones.
 5. Override a method when needed; use `super.method()` to reuse parent logic.
 
-**Interview line:** *“`extends` inherits. `super()` initializes the parent part. Then the child adds its own props and methods.”*
+### Real-world example: React class components
+
+In React, you often **`extends React.Component`** to get built-in state + lifecycle. Your component adds its own props/state usage; `super(props)` initializes the parent `Component` side.
+
+```js
+class Counter extends React.Component {
+  constructor(props) {
+    super(props); // required — initializes React.Component (props, etc.)
+    this.state = { count: 0 }; // subclass-only state
+  }
+
+  increment = () => {
+    this.setState({ count: this.state.count + 1 }); // uses inherited setState
+  };
+
+  render() {
+    return <button onClick={this.increment}>{this.state.count}</button>;
+  }
+}
+```
+
+| From `React.Component` (inherited) | From your subclass (added) |
+|------------------------------------|----------------------------|
+| `props`, `setState`, lifecycle | Your `state`, handlers, `render` UI |
+
+**Interview line:** *“`extends` reuses a parent. In React, `class X extends React.Component` + `super(props)` gives you Component features; you add the UI-specific parts.”*
+
+---
+
+<a id="mixins"></a>
+## Mixins
+
+JavaScript allows **one** parent via `extends`. A **mixin** lets you pull in methods from **multiple sources** and compose them into one class — useful when behaviors don’t fit a single inheritance tree.
+
+### Pattern: `Object.assign` in the constructor
+
+Copy mixin methods onto the **instance**:
+
+```js
+const canEat = {
+  eat() {
+    return `${this.name} eats`;
+  },
+};
+
+const canWalk = {
+  walk() {
+    return `${this.name} walks`;
+  },
+};
+
+class Person {
+  constructor(name) {
+    this.name = name;
+    Object.assign(this, canEat, canWalk); // compose behaviors onto instance
+  }
+}
+
+const p = new Person("Alex");
+p.eat();  // "Alex eats"
+p.walk(); // "Alex walks"
+```
+
+| `extends` (inheritance) | Mixin (composition) |
+|-------------------------|---------------------|
+| One parent class | Many behavior objects |
+| Methods on prototype | Often copied onto instance (`Object.assign`) |
+| Clear hierarchy | Flexible, but harder to track |
+
+### Use thoughtfully
+
+- ✅ Share small, reusable behaviors across unrelated classes  
+- ⚠️ Adds complexity (where did this method come from?)  
+- ⚠️ In **React**, mixins on class components are largely **discouraged** — prefer composition, HOCs, hooks, or shared utility functions  
+
+**Interview line:** *“Mixins compose multiple behaviors when one `extends` isn’t enough — flexible, but use carefully (React communities often avoid them).”*
 
 ---
 
@@ -617,6 +693,8 @@ Need a quick calculation or transform → **function**.
 - [ ] `get` / `set` encapsulate data (often via `_prop`); validate in setter
 - [ ] `extends` + `super` rules (call `super` before `this`)
 - [ ] Subclass can add own props, defaults, and methods
+- [ ] React: `extends React.Component` + `super(props)` for class components
+- [ ] Mixins compose multiple behaviors (`Object.assign`); use thoughtfully (React often avoids)
 - [ ] Parent prototype updates affect child instances
 - [ ] Class = blueprint + methods; Function = simple / stateless work
 
