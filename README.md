@@ -3,6 +3,7 @@
 ## Topics
 - [What is a Class?](#what-is-a-class)
 - [Why Classes Matter](#why-classes-matter)
+- [Classes Are Prototypes](#classes-are-prototypes)
 - [Classes Are NOT Hoisted](#classes-are-not-hoisted)
 - [Two Ways to Define a Class](#two-ways-to-define-a-class)
 - [Anatomy of a Class](#anatomy-of-a-class)
@@ -73,6 +74,56 @@ Animal.prototype.speak = function () {
 };
 console.log(d.speak()); // "updated sound"
 ```
+
+---
+
+<a id="classes-are-prototypes"></a>
+## Classes Are Prototypes
+
+A class still creates a **prototype**. Every instance inherits methods from that prototype — they are not copied onto each object.
+
+```js
+class Car {
+  honk() {
+    return "beep";
+  }
+}
+
+const c1 = new Car();
+const c2 = new Car();
+
+c1.honk(); // "beep" — found on Car.prototype
+c2.honk(); // "beep" — same shared method
+
+console.log(c1.honk === c2.honk);           // true (one shared function)
+console.log(Object.getPrototypeOf(c1) === Car.prototype); // true
+```
+
+### Built-in prototype methods also work
+
+Instances sit on the normal prototype chain, so they also get methods from `Object.prototype` (unless you break the chain).
+
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+const u = new User("Alex");
+
+u.toString();                 // ✅ "[object Object]" — from Object.prototype
+u.hasOwnProperty("name");     // ✅ true — own property check
+"name" in u;                  // ✅ true — own or inherited
+Object.keys(u);               // ["name"] — own enumerable keys only
+```
+
+| What you get | From where |
+|--------------|------------|
+| Class methods (`honk`) | `Car.prototype` |
+| Built-ins (`toString`, `hasOwnProperty`) | `Object.prototype` (further up the chain) |
+
+**Interview line:** *“A class instance inherits from the class prototype — and through that chain, from `Object.prototype` too.”*
 
 ---
 
@@ -422,6 +473,7 @@ Need a quick calculation or transform → **function**.
 
 - [ ] Classes are **syntactic sugar** over prototypes
 - [ ] Methods are on the **prototype**, not copied per instance
+- [ ] Instances inherit class methods + built-ins like `toString` / `hasOwnProperty`
 - [ ] Classes are **not hoisted** (TDZ)
 - [ ] Class body is always **strict mode** (no `"use strict"` needed)
 - [ ] Functions can be **overwritten**; classes are **extended**, not redeclared
