@@ -1,5 +1,20 @@
 # JavaScript Classes (ES6) — Interview Notes
 
+## Topics
+- [What is a Class?](#what-is-a-class)
+- [Why Classes Matter](#why-classes-matter)
+- [Classes Are NOT Hoisted](#classes-are-not-hoisted)
+- [Two Ways to Define a Class](#two-ways-to-define-a-class)
+- [Anatomy of a Class](#anatomy-of-a-class)
+- [`static` Keyword](#static-keyword)
+- [Classes Are Always in Strict Mode](#classes-are-always-in-strict-mode)
+- [Inheritance (Must-Know for Interviews)](#inheritance-must-know-for-interviews)
+- [Class vs Constructor Function (Quick Compare)](#class-vs-constructor-function-quick-compare)
+- [Class vs Function — Interview Core](#class-vs-function-interview-core)
+- [Interview Checklist](#interview-checklist)
+- [One-Line Summary](#one-line-summary)
+
+<a id="what-is-a-class"></a>
 ## What is a Class?
 
 A **class** is cleaner syntax for creating objects and setting up inheritance using prototypes.
@@ -30,6 +45,7 @@ class Person {
 
 ---
 
+<a id="why-classes-matter"></a>
 ## Why Classes Matter
 
 | Point | Meaning |
@@ -60,6 +76,7 @@ console.log(d.speak()); // "updated sound"
 
 ---
 
+<a id="classes-are-not-hoisted"></a>
 ## Classes Are NOT Hoisted
 
 Function declarations are hoisted. **Class declarations are not.**
@@ -95,6 +112,7 @@ const p = new Person(); // ✅
 
 ---
 
+<a id="two-ways-to-define-a-class"></a>
 ## Two Ways to Define a Class
 
 ### 1. Class Declaration (focus of this course)
@@ -128,6 +146,7 @@ Both create a class. Declarations are what you’ll use most in interviews and r
 
 ---
 
+<a id="anatomy-of-a-class"></a>
 ## Anatomy of a Class
 
 ```js
@@ -169,6 +188,7 @@ c1.info();           // ❌ TypeError
 
 ---
 
+<a id="static-keyword"></a>
 ## `static` Keyword
 
 Use `static` for methods that belong to the **class**, not to each instance.
@@ -228,6 +248,7 @@ u.validateEmail("x");          // ❌ TypeError
 
 ---
 
+<a id="classes-are-always-in-strict-mode"></a>
 ## Classes Are Always in Strict Mode
 
 You do **not** write `"use strict"` inside a class. The class body (constructor + methods) is automatically strict.
@@ -266,6 +287,7 @@ Other strict rules that apply inside classes:
 
 ---
 
+<a id="inheritance-must-know-for-interviews"></a>
 ## Inheritance (Must-Know for Interviews)
 
 ```js
@@ -300,6 +322,7 @@ dog.speak(); // "Bruno barks"
 
 ---
 
+<a id="class-vs-constructor-function-quick-compare"></a>
 ## Class vs Constructor Function (Quick Compare)
 
 | Topic | Constructor Function | Class |
@@ -312,6 +335,7 @@ dog.speak(); // "Bruno barks"
 
 ---
 
+<a id="class-vs-function-interview-core"></a>
 ## Class vs Function — Interview Core
 
 ### Key difference
@@ -393,6 +417,7 @@ Need a quick calculation or transform → **function**.
 
 ---
 
+<a id="interview-checklist"></a>
 ## Interview Checklist
 
 - [ ] Classes are **syntactic sugar** over prototypes
@@ -409,6 +434,7 @@ Need a quick calculation or transform → **function**.
 
 ---
 
+<a id="one-line-summary"></a>
 ## One-Line Summary
 
 > Classes make prototype-based OOP cleaner. Use a **class** for reusable blueprints with state/methods; use a **function** for simple, stateless work.
