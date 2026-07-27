@@ -9,6 +9,7 @@
 - [Anatomy of a Class](#anatomy-of-a-class)
 - [`constructor` Keyword](#constructor-keyword)
 - [`static` Keyword](#static-keyword)
+- [Getters & Setters](#getters-setters)
 - [Classes Are Always in Strict Mode](#classes-are-always-in-strict-mode)
 - [Inheritance & `super`](#inheritance-must-know-for-interviews)
 - [Class vs Constructor Function (Quick Compare)](#class-vs-constructor-function-quick-compare)
@@ -343,6 +344,62 @@ u.validateEmail("x");          // ❌ TypeError
 
 ---
 
+<a id="getters-setters"></a>
+## Getters & Setters
+
+`get` and `set` let you **control access** to a property. Outside code reads/writes like a normal property — inside, you run custom logic (validation, formatting, etc.).
+
+This is **encapsulation**: protect internal data; expose a safe interface.
+
+### Convention: `_property`
+
+Store the real value in a “private-by-convention” field (often `_brand`). Expose it through `get` / `set`.
+
+> Note: `_` is a **naming convention**, not real privacy. For true privacy use `#brand` (private fields). Interviews often still ask about `get` / `set` + `_`.
+
+```js
+class Car {
+  constructor(brand) {
+    this._brand = brand; // internal storage
+  }
+
+  // get → read: car.brand
+  get brand() {
+    return this._brand;
+  }
+
+  // set → write: car.brand = "Honda"
+  set brand(value) {
+    if (!value || typeof value !== "string") {
+      throw new Error("Brand must be a non-empty string");
+    }
+    this._brand = value;
+  }
+}
+
+const car = new Car("Toyota");
+
+car.brand;           // ✅ "Toyota" — calls get
+car.brand = "Honda"; // ✅ calls set (with validation)
+car.brand = "";      // ❌ Error — setter blocked bad value
+
+// still possible (convention only):
+car._brand = "X";    // works, but don't — use the setter
+```
+
+### Why use them
+
+| Benefit | Meaning |
+|---------|---------|
+| Controlled access | Outside code doesn’t touch raw data blindly |
+| Validation | Reject bad values in `set` |
+| Flexibility | Change internal storage later; public API stays the same |
+| Looks like a property | `car.brand` — not `car.getBrand()` |
+
+**Interview line:** *“`get` / `set` encapsulate data — read/write looks like a property, but you control the logic behind it.”*
+
+---
+
 <a id="classes-are-always-in-strict-mode"></a>
 ## Classes Are Always in Strict Mode
 
@@ -557,6 +614,7 @@ Need a quick calculation or transform → **function**.
 - [ ] `constructor`, instance props, methods, `static`
 - [ ] One `constructor` only; missing → default constructor
 - [ ] `static` = class-only utility; not callable on instances
+- [ ] `get` / `set` encapsulate data (often via `_prop`); validate in setter
 - [ ] `extends` + `super` rules (call `super` before `this`)
 - [ ] Subclass can add own props, defaults, and methods
 - [ ] Parent prototype updates affect child instances
