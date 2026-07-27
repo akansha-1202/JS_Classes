@@ -64,19 +64,34 @@ console.log(d.speak()); // "updated sound"
 
 Function declarations are hoisted. **Class declarations are not.**
 
-You must declare a class before you use it.
+So: declare a class **before** you use it. Call a function **anywhere** — even above its declaration.
 
 ```js
+// FUNCTION — use first, declare later → works
+greet(); // ✅ "hello"
+
+function greet() {
+  return "hello";
+}
+
+
+// CLASS — use before declare → error
 const p = new Person(); // ❌ ReferenceError
 class Person {}
-```
 
-```js
+
+// CLASS — declare first, then use → works
 class Person {}
-const p = new Person(); // ✅ works
+const p = new Person(); // ✅
 ```
 
-**Interview trap:** *TDZ (Temporal Dead Zone) applies to classes — like `let` / `const`.*
+| | Call / `new` before declaration? |
+|--|----------------------------------|
+| Function declaration | ✅ Works (hoisted) |
+| Class declaration | ❌ Throws (not hoisted) |
+
+**Interview trap:** *TDZ (Temporal Dead Zone) applies to classes — like `let` / `const`.*  
+**Interview line:** *“Functions can be called anywhere because of hoisting. Classes must appear above any `new` or they throw.”*
 
 ---
 
@@ -154,6 +169,103 @@ c1.info();           // ❌ TypeError
 
 ---
 
+## `static` Keyword
+
+Use `static` for methods that belong to the **class**, not to each instance.
+
+Call them on the class name. Calling them on an instance throws.
+
+```js
+class MathUtil {
+  static add(a, b) {
+    return a + b; // no `this` instance data needed
+  }
+
+  static isEven(n) {
+    return n % 2 === 0;
+  }
+}
+
+MathUtil.add(2, 3);     // ✅ 5  — via class
+MathUtil.isEven(4);     // ✅ true
+
+const m = new MathUtil();
+m.add(2, 3);            // ❌ TypeError — not on the instance
+```
+
+### When to use `static`
+
+| Use `static` when… | Use instance method when… |
+|--------------------|---------------------------|
+| Logic is a **utility** (no per-object state) | Logic needs `this` / instance data |
+| Related to the class itself (helpers, factories) | Behavior differs per object |
+| Example: `User.validateEmail(email)` | Example: `user.login()` |
+
+```js
+class User {
+  constructor(email) {
+    this.email = email;
+  }
+
+  // instance → needs this user's data
+  getEmail() {
+    return this.email;
+  }
+
+  // static → utility; no specific user required
+  static validateEmail(email) {
+    return email.includes("@");
+  }
+}
+
+User.validateEmail("a@b.com"); // ✅ true
+const u = new User("a@b.com");
+u.getEmail();                  // ✅ "a@b.com"
+u.validateEmail("x");          // ❌ TypeError
+```
+
+**Interview line:** *“`static` methods live on the class — use them for utilities that don’t need an instance.”*
+
+---
+
+## Classes Are Always in Strict Mode
+
+You do **not** write `"use strict"` inside a class. The class body (constructor + methods) is automatically strict.
+
+That means properties and methods inside the class follow stricter rules than loose (sloppy) mode.
+
+### Why it matters
+
+| Benefit | Meaning |
+|---------|---------|
+| Catch silent bugs | Mistakes throw errors instead of failing quietly |
+| Safer code | Blocks risky patterns (e.g. accidental globals) |
+| Future-proof | Bans syntax reserved for upcoming JS versions |
+
+```js
+// Outside class (non-strict) — silent bug
+function bad() {
+  x = 10; // creates global `x` quietly
+}
+
+// Inside class — always strict → throws
+class Demo {
+  setX() {
+    x = 10; // ❌ ReferenceError: x is not defined
+  }
+}
+```
+
+Other strict rules that apply inside classes:
+- `this` is `undefined` in a method if you call it without an object (not auto-bound to `window`)
+- Duplicate parameter names are not allowed
+- `with` statement is forbidden
+- Deleting undeletable properties throws
+
+**Interview line:** *“Class bodies are strict by default — no `"use strict"` needed, and common silent bugs become real errors.”*
+
+---
+
 ## Inheritance (Must-Know for Interviews)
 
 ```js
@@ -200,18 +312,103 @@ dog.speak(); // "Bruno barks"
 
 ---
 
+## Class vs Function — Interview Core
+
+### Key difference
+
+| | Function | Class |
+|--|----------|--------|
+| Hoisting | Yes (function declarations) | No (TDZ) |
+| Overwrite / redeclare | Yes — later declaration replaces earlier one | No — same-scope redeclare throws |
+| Extend | Manual / awkward | Built-in with `extends` |
+
+```js
+// Function → hoisted + can be overwritten
+sayHi(); // ✅ works (hoisted)
+
+function sayHi() {
+  return "hi v1";
+}
+function sayHi() {
+  return "hi v2"; // overwrites previous
+}
+sayHi(); // "hi v2"
+
+
+// Class → NOT hoisted + cannot be overwritten
+const c = new Car(); // ❌ ReferenceError (not hoisted)
+
+class Car {}
+class Car {} // ❌ SyntaxError: already declared
+
+// Class → extend instead of overwrite
+class SUV extends Car {} // ✅ reuse + customize
+```
+
+**Interview line:** *“Functions can be hoisted and overwritten. Classes cannot — you extend them, you don’t redeclare them.”*
+
+---
+
+### When to use what
+
+| Use a **class** when… | Use a **function** when… |
+|------------------------|---------------------------|
+| You need a reusable **blueprint** (many similar objects) | One-off / simple logic |
+| Object has **state + methods** that work together | Stateless operation (in → out) |
+| You need **inheritance** (`extends`) | No shared instance state needed |
+| Example: React **class component** + lifecycle methods | Example: React **stateless functional component** |
+
+```js
+// CLASS → blueprint with state + methods
+class Counter {
+  constructor() {
+    this.count = 0;
+  }
+  increment() {
+    this.count += 1;
+    return this.count;
+  }
+}
+
+const c1 = new Counter();
+c1.increment(); // 1
+
+
+// FUNCTION → simple, stateless operation
+function add(a, b) {
+  return a + b;
+}
+
+add(2, 3); // 5
+```
+
+**React mental model (interview-friendly):**
+- **Class component** → state, lifecycle, reusable UI blueprint
+- **Functional component** → simple UI from props (stateless)  
+  *(Modern React prefers functions + hooks; class knowledge still asked in interviews.)*
+
+**Decision rule:**  
+Need many objects with shared behavior / inheritance → **class**.  
+Need a quick calculation or transform → **function**.
+
+---
+
 ## Interview Checklist
 
 - [ ] Classes are **syntactic sugar** over prototypes
 - [ ] Methods are on the **prototype**, not copied per instance
 - [ ] Classes are **not hoisted** (TDZ)
+- [ ] Class body is always **strict mode** (no `"use strict"` needed)
+- [ ] Functions can be **overwritten**; classes are **extended**, not redeclared
 - [ ] Know **declaration** vs **expression**
 - [ ] `constructor`, instance props, methods, `static`
+- [ ] `static` = class-only utility; not callable on instances
 - [ ] `extends` + `super` rules
 - [ ] Parent prototype updates affect child instances
+- [ ] Class = blueprint + methods; Function = simple / stateless work
 
 ---
 
 ## One-Line Summary
 
-> Classes make prototype-based OOP in JavaScript cleaner — same engine under the hood, better syntax on top.
+> Classes make prototype-based OOP cleaner. Use a **class** for reusable blueprints with state/methods; use a **function** for simple, stateless work.
