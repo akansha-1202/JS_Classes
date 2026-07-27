@@ -26,12 +26,33 @@ console.log("cz4 => carStats : ", cz4.carStats());
 console.log("Total Doors : ", Car.totalDoors(cx5, cz4)); //9
 
 
+
+console.log("--------------------------------");
+
+
+let mixin = {
+    madeIn(){
+        return `This car was made in this year`;
+    }
+}
+
+let carMixin  = {
+    __proto__ : mixin,
+
+    madeIn(){
+        return super.madeIn();
+    }
+}
+
+
 class SUV extends Car{
     constructor(doors, engine, color, speed, carStats){
         super(doors, engine, color, carStats);
         this._brand = "not set brand yet";
         this.speed = speed;
         this.wheels = 4;
+
+        Object.assign(this, carMixin);
     }
 
     get getBrand(){
@@ -55,3 +76,6 @@ console.log("--------------------------------");
 suv.setBrand = "Toyota";
 console.log("suv => getBrand : ", suv.getBrand);
 console.log("suv => myBrand : ", suv.myBrand());
+
+console.log("--------------------------------");
+console.log("suv => madeIn : ", suv.madeIn());
