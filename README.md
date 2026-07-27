@@ -7,9 +7,10 @@
 - [Classes Are NOT Hoisted](#classes-are-not-hoisted)
 - [Two Ways to Define a Class](#two-ways-to-define-a-class)
 - [Anatomy of a Class](#anatomy-of-a-class)
+- [`constructor` Keyword](#constructor-keyword)
 - [`static` Keyword](#static-keyword)
 - [Classes Are Always in Strict Mode](#classes-are-always-in-strict-mode)
-- [Inheritance (Must-Know for Interviews)](#inheritance-must-know-for-interviews)
+- [Inheritance & `super`](#inheritance-must-know-for-interviews)
 - [Class vs Constructor Function (Quick Compare)](#class-vs-constructor-function-quick-compare)
 - [Class vs Function — Interview Core](#class-vs-function-interview-core)
 - [Interview Checklist](#interview-checklist)
@@ -239,6 +240,49 @@ c1.info();           // ❌ TypeError
 
 ---
 
+<a id="constructor-keyword"></a>
+## `constructor` Keyword
+
+`constructor` is a special method. It runs when you create an instance with `new`. Its job: **create + initialize** the object.
+
+### Rules
+
+| Rule | Meaning |
+|------|---------|
+| Only **one** constructor per class | Two → SyntaxError |
+| Optional | If you skip it, JS gives a **default** empty constructor |
+| Can take parameters | Set initial property values |
+| Can use defaults | Props work even if caller skips some args |
+
+```js
+// No constructor → JS provides a default one
+class Empty {}
+const e = new Empty(); // ✅ works
+
+
+// One constructor + params + defaults
+class Car {
+  constructor(doors = 4, color = "black") {
+    this.doors = doors;
+    this.color = color;
+  }
+}
+
+const c1 = new Car(2, "red"); // doors: 2, color: "red"
+const c2 = new Car();         // doors: 4, color: "black" (defaults)
+```
+
+```js
+class Bad {
+  constructor() {}
+  constructor() {} // ❌ SyntaxError — only one allowed
+}
+```
+
+**Interview line:** *“`constructor` initializes the instance on `new`. One per class; if missing, JS supplies a default.”*
+
+---
+
 <a id="static-keyword"></a>
 ## `static` Keyword
 
@@ -339,7 +383,9 @@ Other strict rules that apply inside classes:
 ---
 
 <a id="inheritance-must-know-for-interviews"></a>
-## Inheritance (Must-Know for Interviews)
+## Inheritance & `super`
+
+`extends` makes a subclass. `super` lets the child call the **parent constructor** or **parent methods** — so you reuse parent logic instead of rewriting it.
 
 ```js
 class Animal {
@@ -352,24 +398,54 @@ class Animal {
 }
 
 class Dog extends Animal {
-  constructor(name, breed) {
-    super(name); // MUST call parent constructor first
-    this.breed = breed;
+  constructor(name, breed = "Unknown") {
+    super(name);       // MUST run before using `this` — sets inherited props
+    this.breed = breed; // subclass-only property
   }
+
+  // own method (plus inherited ones)
+  fetch() {
+    return `${this.name} fetches the ball`;
+  }
+
+  // override + reuse parent via super.method()
   speak() {
-    return `${this.name} barks`; // method override
+    return `${super.speak()} — specifically, barks`;
   }
 }
 
 const dog = new Dog("Bruno", "Lab");
-dog.speak(); // "Bruno barks"
+dog.speak(); // uses override (+ parent via super)
+dog.fetch(); // subclass method
+dog.name;    // "Bruno" — inherited via super(name)
+dog.breed;   // "Lab" — subclass property
+
+const d2 = new Dog("Max"); // breed defaults to "Unknown"
+```
+
+### Subclass constructor rules
+
+| Situation | What happens |
+|-----------|--------------|
+| Child has **no** constructor | JS default calls `super(...args)` for you |
+| Child **declares** a constructor | Must call `super(...)` **before** `this` |
+| After `super(...)` | Add subclass-only props / defaults |
+
+```js
+// No child constructor → still works; default calls super
+class Cat extends Animal {}
+const cat = new Cat("Milo");
+cat.speak(); // "Milo makes a sound"
 ```
 
 **Rules to remember:**
 1. Child uses `extends Parent`.
-2. If child has a `constructor`, it **must** call `super(...)` before using `this`.
-3. Overriding a method replaces the parent version for that child.
-4. Use `super.method()` to reuse parent method logic.
+2. If child has a `constructor`, call `super(...)` before `this`.
+3. After `super`, add subclass-specific properties (and defaults if needed).
+4. Subclasses can add their own methods and still use inherited ones.
+5. Override a method when needed; use `super.method()` to reuse parent logic.
+
+**Interview line:** *“`extends` inherits. `super()` initializes the parent part. Then the child adds its own props and methods.”*
 
 ---
 
@@ -479,8 +555,10 @@ Need a quick calculation or transform → **function**.
 - [ ] Functions can be **overwritten**; classes are **extended**, not redeclared
 - [ ] Know **declaration** vs **expression**
 - [ ] `constructor`, instance props, methods, `static`
+- [ ] One `constructor` only; missing → default constructor
 - [ ] `static` = class-only utility; not callable on instances
-- [ ] `extends` + `super` rules
+- [ ] `extends` + `super` rules (call `super` before `this`)
+- [ ] Subclass can add own props, defaults, and methods
 - [ ] Parent prototype updates affect child instances
 - [ ] Class = blueprint + methods; Function = simple / stateless work
 
